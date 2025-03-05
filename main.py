@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 import json
 
 app = FastAPI()
@@ -10,6 +10,11 @@ class Task(BaseModel):
     title: str
     description: str
     completed: bool = False
+
+class TaskUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    completed: Optional[bool] = None
 
 # tasks = [
 #     Task(id = 0, title = "Learning", description = "Learning all libraries and APIs", completed = False),
@@ -27,17 +32,12 @@ tasks = {
 
 @app.get("/tasks/", response_model = List[Task])
 def get_tasks():
-    return tasks
+    return list(tasks.values())
 
 @app.post("/tasks/")
 def create_task(task: Task):
-    n = len(tasks)
-    id, task_id = len(tasks)
-    title = task.title
-    description = task.description
-    completed = task.completed
-    tasks[task_id] = Task(id=id, title = title, description = description, completed = completed)
-    return task
+    tasks[task.id] = task
+    return list(task.values())
 
 
 
@@ -45,3 +45,17 @@ def create_task(task: Task):
 def delete_task(task_id: int):
     complete = tasks.pop(task_id, None)
     return {"message": "Task deleted", "task": complete}
+
+@app.patch("/tasks/{task_id}")
+def update_task(task_id: int, new_task: TaskUpdate):
+    if new_task.title:
+        new_title = new_task.title
+        tasks[task_id].title = new_task.title
+    if new_task.description:
+        new_desc = new_task.description
+        tasks[task_id].description = new_task.description
+    if new_task.completed is not None:
+        new_comp = new_task.completed
+        tasks[task_id].completed = new_task.completed
+    
+    return {"message": "Task updated", "task": tasks[task_id]}
