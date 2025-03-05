@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
 import json
@@ -36,6 +36,8 @@ def get_tasks():
 
 @app.post("/tasks/")
 def create_task(task: Task):
+    if not task.title.strip():
+        raise HTTPException(status_code=400, detail="Title cannot be blank")
     tasks[task.id] = task
     return list(task.values())
 
@@ -43,14 +45,20 @@ def create_task(task: Task):
 
 @app.delete("/tasks/{task_id}")
 def delete_task(task_id: int):
+    if task_id not in tasks:
+        raise HTTPException(status_code=404, detail="Task ID not found")
     complete = tasks.pop(task_id, None)
     return {"message": "Task deleted", "task": complete}
 
 @app.patch("/tasks/{task_id}")
 def update_task(task_id: int, new_task: TaskUpdate):
+    
+    if new_task.title is not None and not new_task.title.strip():
+        raise HTTPException(status_code=400, detail="Title cannot be blank")
     if new_task.title:
         new_title = new_task.title
         tasks[task_id].title = new_task.title
+
     if new_task.description:
         new_desc = new_task.description
         tasks[task_id].description = new_task.description
