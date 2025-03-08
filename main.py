@@ -1,9 +1,12 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
+from routes.auth import router as auth_router
 import json
 
 app = FastAPI()
+
+app.include_router(auth_router, prefix ="/auth")
 
 class Task(BaseModel):
     id: int
