@@ -15,4 +15,10 @@ async def register_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
     # existing_email = await db.execute(select(User).where(User.email == user.email)) # SELECT * FROM users WHERE email = {user.email}
     if existing_user.scalars().first() or existing_user.scalars().first():
         raise HTTPException(status_code=400, detail="Username or Email already registered")
+    
+    secure = hash_password(user.password)
+    new_user = User(username = user.username, email = user.email, hashed_password = secure)
+    db.add(new_user)
+    await db.commit()
+    
     return {"message": "User Registered"}
