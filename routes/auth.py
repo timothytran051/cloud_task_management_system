@@ -3,11 +3,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from models import User
 from database import get_db
-from utils.auth import hash_password, verify_password
+from utils.auth import hash_password, verify_password, generate_token, verify_token
 from pydantic import BaseModel, EmailStr
 from schemas.schemas import UserCreate, UserLogin
+import os
+from dotenv import load_dotenv
 
 router = APIRouter()
+load_dotenv()
+key = os.getenv("SECRET_KEY")
 
 @router.post("/register")
 async def register_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
@@ -34,4 +38,5 @@ async def login_user(user: UserLogin, db: AsyncSession = Depends(get_db)):
     if verify == False:
         raise HTTPException(status_code = 400, detail = "Incorrect Password")
     
-    
+    token = generate_token({"sub": user_data.id}, key)
+    return {"access_token": token, "token_type": "bearer"}

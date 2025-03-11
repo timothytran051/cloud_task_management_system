@@ -24,10 +24,9 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 # print(verify_password("password123", stored_hash))
 # print(verify_password("wrongpass", stored_hash))
 
-def generate_token(payload, key, user_id):
+def generate_token(payload, key):
     expiration_time = datetime.utcnow() + timedelta(minutes=30)
     payload.update({       
-        "sub": user_id,
         "exp": expiration_time})
     token = jwt.encode(payload, key, algorithm = "HS256")
 
