@@ -3,6 +3,7 @@ import jwt
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 import os
+from fastapi import HTTPException
 
 load_dotenv()
 key = os.getenv("SECRET_KEY")
@@ -30,3 +31,13 @@ def generate_token(payload, key, user_id):
         "exp": expiration_time})
     token = jwt.encode(payload, key, algorithm = "HS256")
 
+def verify_token(token, key):
+    try:
+        verify = jwt.decode(token, key, algorithms=["HS256"])
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Expired Token")
+    except jwt.InvalidSignatureError:
+        raise HTTPException(status_code=401, detail="Invalid Signature")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid Token")
+    return verify
