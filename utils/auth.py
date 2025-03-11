@@ -1,4 +1,11 @@
 import bcrypt
+import jwt
+from datetime import datetime, timedelta
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+key = os.getenv("SECRET_KEY")
 
 def hash_password(plain_password:str ) -> str:
     salt = bcrypt.gensalt()
@@ -15,3 +22,11 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 # stored_hash = hash_password("password123")
 # print(verify_password("password123", stored_hash))
 # print(verify_password("wrongpass", stored_hash))
+
+def generate_token(payload, key, user_id):
+    expiration_time = datetime.utcnow() + timedelta(minutes=30)
+    payload.update({       
+        "sub": user_id,
+        "exp": expiration_time})
+    token = jwt.encode(payload, key, algorithm = "HS256")
+
