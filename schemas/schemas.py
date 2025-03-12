@@ -11,12 +11,12 @@ class UserLogin(BaseModel):
     email: Optional[str] = None
     password: str
     
-# class TaskSchema(BaseModel):
-#     id: int
-#     title: str
-#     description: Optional[str]
-#     completed: bool
-#     user_id: int
+class TaskSchema(BaseModel):
+    id: int
+    title: str
+    description: Optional[str]
+    completed: bool
+    user_id: int
     
-#     class Config:
-#         orm_mode = True
+    class Config:
+        orm_mode = True

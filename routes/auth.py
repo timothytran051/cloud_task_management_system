@@ -11,6 +11,7 @@ import os
 from dotenv import load_dotenv
 from fastapi.security import OAuth2PasswordBearer
 from typing import List
+import jwt
 
 router = APIRouter()
 load_dotenv()
@@ -51,19 +52,26 @@ async def login_user(user: UserLogin, db: AsyncSession = Depends(get_db)):
 oauth2 = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 def token_verification(token: str = Depends(oauth2)):
-    print(f"Received Token: {token}")
     key = os.getenv("SECRET_KEY")
-    verify = verify_token(token, key)
+    # verify = verify_token(token, key)
+    # print(f"first pass: {token}")
+    # print(f"key: {key}")
+    verify = None
+    try:
+        verify = verify_token(token, key)
+    except Exception as e:
+        print(f"Error decoding token: {e}")
     if not verify:
         raise HTTPException(status_code=401, detail="Token verification failed")
     return verify
     
-@router.get("/tasks")
-async def get_tasks(user: dict = Depends(token_verification), db: AsyncSession = Depends(get_db)):
-    query = select(Task).where(Task.user_id == user["sub"])
-    result = await db.execute(query)
-    tasks = result.scalars().all()
-    return tasks
+# @router.get("/tasks")
+# async def get_tasks(user: dict = Depends(token_verification), db: AsyncSession = Depends(get_db)):
+#     print("get tasks")
+#     query = select(Task).where(Task.user_id == user["sub"])
+#     result = await db.execute(query)
+#     tasks = result.scalars().all()
+#     return tasks
     
 # @router.post("/tasks/")
 # async def create_task(task: Task, user: dict = Depends(token_verification), db: AsyncSession = Depends(get_db)):

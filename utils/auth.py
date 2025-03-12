@@ -25,9 +25,11 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 # print(verify_password("wrongpass", stored_hash))
 
 def generate_token(payload, key):
-    # print("generate_token function")
-    # print(f"payload: {payload}")
-    # print(f"key: {key}")
+    expiration_time = datetime.utcnow() + timedelta(minutes=30)
+    payload.update({
+        "sub": str(payload["sub"]),
+        "exp": expiration_time
+    })
     try:
         token = jwt.encode(payload, key, algorithm="HS256")
         # print(f"token: {token}")
@@ -42,7 +44,10 @@ def generate_token(payload, key):
 
 def verify_token(token, key):
     try:
+        # print(f"first pass: {token}")
+        # print(f"key: {key}")
         verify = jwt.decode(token, key, algorithms=["HS256"])
+        # print(f"after pass: {verify}")
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Expired Token")
     except jwt.InvalidSignatureError:
