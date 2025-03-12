@@ -20,3 +20,11 @@ class TaskSchema(BaseModel):
     
     class Config:
         orm_mode = True
+        
+class TaskCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    completed: bool = False
+    
+    class Config:
+        orm_mode = True
