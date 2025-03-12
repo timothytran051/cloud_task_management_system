@@ -25,10 +25,20 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 # print(verify_password("wrongpass", stored_hash))
 
 def generate_token(payload, key):
-    expiration_time = datetime.utcnow() + timedelta(minutes=30)
-    payload.update({       
-        "exp": expiration_time})
-    token = jwt.encode(payload, key, algorithm = "HS256")
+    # print("generate_token function")
+    # print(f"payload: {payload}")
+    # print(f"key: {key}")
+    try:
+        token = jwt.encode(payload, key, algorithm="HS256")
+        # print(f"token: {token}")
+        return token
+    except Exception as e:
+        print(f"⚠️ JWT Encoding Error: {e}")
+        return None
+    # expiration_time = datetime.utcnow() + timedelta(minutes=30)
+    # payload.update({       
+    #     "exp": expiration_time})
+    # token = jwt.encode(payload, key, algorithm = "HS256")
 
 def verify_token(token, key):
     try:
