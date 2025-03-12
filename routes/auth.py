@@ -60,3 +60,21 @@ async def get_tasks(user: dict = Depends(token_verification), db: AsyncSession =
     tasks = result.scalars().all()
     return tasks
     # db.execute("SELECT * FROM tasks WHERE user_id = {user.id}")
+    
+@router.post("/tasks/")
+async def create_task(task: Task, user: dict = Depends(token_verification), db: AsyncSession = Depends(get_db)):
+    temp = Task(
+        title = task.title,
+        description = task.description,
+        completed = task.completed,
+        user_id = user["sub"]
+    )
+    db.add(temp)
+    await db.commit()
+    await db.refresh(temp)
+    return temp
+# def create_task(task: Task):
+#     if not task.title.strip():
+#         raise HTTPException(status_code=400, detail="Title cannot be blank")
+#     tasks[task.id] = task
+#     return list(task.values())
