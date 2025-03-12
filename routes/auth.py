@@ -1,13 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from models import User
+from models import User, Task
 from database import get_db
 from utils.auth import hash_password, verify_password, generate_token, verify_token
 from pydantic import BaseModel, EmailStr
 from schemas.schemas import UserCreate, UserLogin
 import os
 from dotenv import load_dotenv
+from fastapi.security import OAuth2PasswordBearer
+from typing import List
 
 router = APIRouter()
 load_dotenv()
@@ -40,3 +42,21 @@ async def login_user(user: UserLogin, db: AsyncSession = Depends(get_db)):
     
     token = generate_token({"sub": user_data.id}, key)
     return {"access_token": token, "token_type": "bearer"}
+
+oauth2 = OAuth2PasswordBearer(tokenurl="login")
+
+def token_verification(token: str = Depends(oauth2)):
+    load_dotenv()
+    key = os.getenv("SECRET_KEY")
+    verify = verify_token(token, key)
+    if not verify:
+        raise HTTPException(status_code=401, detail="Token verification failed")
+    return verify
+    
+@router.get("/tasks/", response_model=List[Task])
+async def get_tasks(user: dict = Depends(token_verification), db: AsyncSession = Depends(get_db)):
+    query = select(Task).where(Task.user_id == user["sub"])
+    result = await db.execute(query)
+    tasks = result.scalars().all()
+    return tasks
+    # db.execute("SELECT * FROM tasks WHERE user_id = {user.id}")
