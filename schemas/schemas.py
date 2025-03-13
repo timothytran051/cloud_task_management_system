@@ -28,3 +28,9 @@ class TaskCreate(BaseModel):
     
     class Config:
         orm_mode = True
+
+# class TaskDelete(BaseModel):
+#     user_id: int
+
+#     class Config:
+#         orm_mode = True
