@@ -16,10 +16,10 @@ class Task(BaseModel):
     description: str
     completed: bool = False
 
-class TaskUpdate(BaseModel):
-    title: Optional[str] = None
-    description: Optional[str] = None
-    completed: Optional[bool] = None
+# class TaskUpdate(BaseModel):
+#     title: Optional[str] = None
+#     description: Optional[str] = None
+#     completed: Optional[bool] = None
 
 # tasks = [
 #     Task(id = 0, title = "Learning", description = "Learning all libraries and APIs", completed = False),

@@ -34,3 +34,11 @@ class TaskCreate(BaseModel):
 
 #     class Config:
 #         orm_mode = True
+
+class TaskUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    completed: Optional[bool] = None
+    
+    class Config:
+        orm_mode = True

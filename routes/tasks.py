@@ -2,12 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import or_
-from sqlalchemy.sql.expression import and_
+from sqlalchemy.sql.expression import and_, update
 from models import Task
 from database import get_db
 from utils.auth import hash_password, verify_password, generate_token, verify_token
 from pydantic import BaseModel, EmailStr
-from schemas.schemas import TaskSchema, TaskCreate
+from schemas.schemas import TaskSchema, TaskCreate, TaskUpdate
 import os
 from dotenv import load_dotenv
 from typing import List
@@ -51,3 +51,41 @@ async def delete_task(task_id: int, user: dict = Depends(token_verification), db
     await db.commit()
     return{"message": "Task Deleted Successfully"}
 
+@router.patch("/{task_id}")
+async def update_task(task_id: int, new_task: TaskUpdate, user: dict = Depends(token_verification), db: AsyncSession = Depends(get_db)):
+    query = select(Task).where(and_(Task.id == task_id, Task.user_id == int(user["sub"])))
+    result = await db.execute(query)
+    task = result.scalars().first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Task does not exist")
+    if task.user_id != int(user["sub"]):
+        raise HTTPException(status_code=403, detail="Forbidden")
+    if new_task.title is not None and not new_task.title.strip():
+        raise HTTPException(status_code=400, detail="Title cannot be blank")
+    
+    if new_task.title:
+        task.title = new_task.title
+    if new_task.description:
+        task.description = new_task.description
+    if new_task.completed:
+        task.completed = new_task.completed
+    
+    await db.commit()
+    await db.refresh(task)
+# @app.patch("/tasks/{task_id}")
+# def update_task(task_id: int, new_task: TaskUpdate):
+    
+#     if new_task.title is not None and not new_task.title.strip():
+#         raise HTTPException(status_code=400, detail="Title cannot be blank")
+#     if new_task.title:
+#         new_title = new_task.title
+#         tasks[task_id].title = new_task.title
+
+#     if new_task.description:
+#         new_desc = new_task.description
+#         tasks[task_id].description = new_task.description
+#     if new_task.completed is not None:
+#         new_comp = new_task.completed
+#         tasks[task_id].completed = new_task.completed
+    
+#     return {"message": "Task updated", "task": tasks[task_id]}
