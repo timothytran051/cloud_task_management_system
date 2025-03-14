@@ -7,7 +7,7 @@ from models import Task
 from database import get_db
 from utils.auth import hash_password, verify_password, generate_token, verify_token
 from pydantic import BaseModel, EmailStr
-from schemas.schemas import TaskSchema, TaskCreate, TaskDelete
+from schemas.schemas import TaskSchema, TaskCreate
 import os
 from dotenv import load_dotenv
 from typing import List
@@ -40,21 +40,14 @@ async def create_task(task: TaskCreate, user: dict = Depends(token_verification)
 
 @router.delete("/{task_id}")
 async def delete_task(task_id: int, user: dict = Depends(token_verification), db: AsyncSession = Depends(get_db)):
-    query = select(Task).where(and_(Task.id == task_id, Task.user_id == user["sub"]))
+    query = select(Task).where(and_(Task.id == task_id, Task.user_id == int(user["sub"])))
     result = await db.execute(query)
     task = result.scalars().first()
     if not task:
         raise HTTPException(status_code=404, detail="Task does not exist")
-    if task.user_id != user["sub"]:
+    if task.user_id != int(user["sub"]):
         raise HTTPException(status_code=403, detail="Forbidden")
     await db.delete(task)
     await db.commit()
     return{"message": "Task Deleted Successfully"}
 
-
-    # @app.delete("/tasks/{task_id}")
-# def delete_task(task_id: int):
-#     if task_id not in tasks:
-#         raise HTTPException(status_code=404, detail="Task ID not found")
-#     complete = tasks.pop(task_id, None)
-#     return {"message": "Task deleted", "task": complete}
