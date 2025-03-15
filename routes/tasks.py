@@ -67,25 +67,9 @@ async def update_task(task_id: int, new_task: TaskUpdate, user: dict = Depends(t
         task.title = new_task.title
     if new_task.description:
         task.description = new_task.description
-    if new_task.completed:
+    if new_task.completed is not None:
         task.completed = new_task.completed
     
     await db.commit()
     await db.refresh(task)
-# @app.patch("/tasks/{task_id}")
-# def update_task(task_id: int, new_task: TaskUpdate):
-    
-#     if new_task.title is not None and not new_task.title.strip():
-#         raise HTTPException(status_code=400, detail="Title cannot be blank")
-#     if new_task.title:
-#         new_title = new_task.title
-#         tasks[task_id].title = new_task.title
-
-#     if new_task.description:
-#         new_desc = new_task.description
-#         tasks[task_id].description = new_task.description
-#     if new_task.completed is not None:
-#         new_comp = new_task.completed
-#         tasks[task_id].completed = new_task.completed
-    
-#     return {"message": "Task updated", "task": tasks[task_id]}
+    return{"message": "Task Updated Successfully", "updated_task": task}
