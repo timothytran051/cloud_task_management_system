@@ -10,3 +10,4 @@ COPY . .
 CMD ["main.handler"]
 
 #wsl --install
+#aws cli, docker
