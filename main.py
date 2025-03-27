@@ -12,6 +12,11 @@ app = FastAPI()
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(task_router, prefix="/tasks", tags=["tasks"])  
 
+@app.get("/ping")
+def ping():
+    return {"status": "lambda is live"}
+
+
 handler = Mangum(app)
 
 SECRET_KEY = os.environ.get("SECRET_KEY")
