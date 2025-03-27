@@ -7,14 +7,19 @@ import json
 from mangum import Mangum
 import os
 
-app = FastAPI()
+app = FastAPI(root_path="/prod")
 
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(task_router, prefix="/tasks", tags=["tasks"])  
 
-@app.get("/ping")
-def ping():
-    return {"status": "lambda is live"}
+# @app.get("/ping")
+# def ping():
+#     return {"status": "lambda is live"}
+
+# @app.get("/")
+# def root():
+#     return {"message": "root reached"}
+
 
 
 handler = Mangum(app)
