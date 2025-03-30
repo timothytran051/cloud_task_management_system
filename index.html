@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Task Manager</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f0f0f0; }
+    button, input { margin: 5px; padding: 10px; font-size: 16px; }
+    #result { margin-top: 20px; white-space: pre-wrap; background: #fff; padding: 10px; border-radius: 5px; }
+    .task-container { margin-top: 10px; background: #fff; padding: 10px; border-radius: 5px; }
+    #authSection, #taskSection { margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <h1>📝 Cloud Task Manager</h1>
+
+  <div id="authSection">
+    <input type="text" id="username" placeholder="Username" />
+    <input type="password" id="password" placeholder="Password" />
+    <button onclick="login()">Login</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <div id="taskSection" style="display:none;">
+    <div>
+      <input type="text" id="title" placeholder="Task title" />
+      <input type="text" id="description" placeholder="Task description" />
+      <button onclick="createTask()">Create Task</button>
+    </div>
+
+    <button onclick="pingServer()">Ping Server</button>
+    <button onclick="getTasks()">Load Tasks</button>
+
+    <div id="taskList" class="task-container"></div>
+  </div>
+
+  <div id="result">Result will appear here...</div>
+
+  <script>
+    const baseURL = "https://YOUR_API_ID.execute-api.us-west-1.amazonaws.com/prod";
+    let token = "";
+
+    function login() {
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+
+      fetch(`${baseURL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+      })
+        .then(res => res.json())
+        .then(data => {
+          token = data.access_token;
+          showResult({ login: "success", token });
+          document.getElementById("taskSection").style.display = "block";
+        })
+        .catch(err => showResult(err));
+    }
+
+    function logout() {
+      token = "";
+      document.getElementById("taskSection").style.display = "none";
+      showResult({ logout: "success" });
+    }
+
+    function getAuthHeaders() {
+      return {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      };
+    }
+
+    function pingServer() {
+      fetch(`${baseURL}/ping`, { headers: getAuthHeaders() })
+        .then(res => res.json())
+        .then(data => showResult(data))
+        .catch(err => showResult(err));
+    }
+
+    function getTasks() {
+      fetch(`${baseURL}/tasks`, { headers: getAuthHeaders() })
+        .then(res => res.json())
+        .then(data => {
+          showResult(data);
+          renderTaskList(data);
+        })
+        .catch(err => showResult(err));
+    }
+
+    function createTask() {
+      const title = document.getElementById("title").value;
+      const description = document.getElementById("description").value;
+
+      const task = { title, description };
+
+      fetch(`${baseURL}/tasks`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(task)
+      })
+        .then(res => res.json())
+        .then(data => {
+          showResult(data);
+          getTasks();
+        })
+        .catch(err => showResult(err));
+    }
+
+    function renderTaskList(tasks) {
+      const container = document.getElementById("taskList");
+      container.innerHTML = "";
+
+      tasks.forEach(task => {
+        const div = document.createElement("div");
+        div.textContent = `${task.title} - ${task.description}`;
+        container.appendChild(div);
+      });
+    }
+
+    function showResult(data) {
+      document.getElementById("result").textContent = JSON.stringify(data, null, 2);
+    }
+  </script>
+</body>
+</html>
