@@ -6,8 +6,19 @@ from routes.tasks import router as task_router
 import json
 from mangum import Mangum
 import os
+from fastapi.middleware.cors import CORSMiddleware
+
 
 app = FastAPI(root_path="/prod") # Change to "/" after production and testing
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://cloud-task-manager-bucket.s3-website-us-west-1.amazonaws.com"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 app.include_router(auth_router, prefix="/auth", tags=["auth"])  
 app.include_router(task_router, prefix="/tasks", tags=["tasks"])  
