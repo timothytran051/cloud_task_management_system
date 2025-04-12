@@ -7,9 +7,9 @@ import json
 from mangum import Mangum
 import os
 
-app = FastAPI(root_path="/prod")
+app = FastAPI(root_path="/prod") # Change to "/" after production and testing
 
-app.include_router(auth_router, prefix="/auth", tags=["auth"])
+app.include_router(auth_router, prefix="/auth", tags=["auth"])  
 app.include_router(task_router, prefix="/tasks", tags=["tasks"])  
 
 # @app.get("/ping")

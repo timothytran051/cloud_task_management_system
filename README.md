@@ -1,3 +1,7 @@
+# Enable Buildkit
+docker buildx create --use
+docker buildx inspect --bootstrap
+
 # Build Docker image for AWS Lambda
 docker buildx build --platform linux/amd64 -t task-manager-lambda . --load
 
