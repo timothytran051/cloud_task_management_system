@@ -12,16 +12,17 @@ from dotenv import load_dotenv
 from fastapi.security import OAuth2PasswordBearer
 from typing import List
 import jwt
+from fastapi.responses import JSONResponse
 
 router = APIRouter()
 load_dotenv()
 key = os.getenv("SECRET_KEY")
-
+    
 @router.post("/register")
 async def register_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
     existing_user = await db.execute(select(User).where((User.username == user.username) | (User.email == user.email)))
-    # existing_email = await db.execute(select(User).where(User.email == user.email)) # SELECT * FROM users WHERE email = {user.email}
     if existing_user.scalars().first():
+        print("Duplicate user detected")
         raise HTTPException(status_code=400, detail="Username or Email already registered")
     
     secure = hash_password(user.password)

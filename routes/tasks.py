@@ -17,15 +17,15 @@ router = APIRouter()
 load_dotenv()
 key = os.getenv("SECRET_KEY")
 
-@router.get("/", response_model = List[TaskSchema])
+@router.get("", response_model = List[TaskSchema])
 async def get_tasks(user: dict = Depends(token_verification), db: AsyncSession = Depends(get_db)):
-    # print("get tasks")
+    print("get tasks")
     query = select(Task).where(Task.user_id == int(user["sub"])) 
     result = await db.execute(query)
     tasks = result.scalars().all()
     return tasks
     
-@router.post("/", response_model=TaskSchema)
+@router.post("", response_model=TaskSchema)
 async def create_task(task: TaskCreate, user: dict = Depends(token_verification), db: AsyncSession = Depends(get_db)):
     new_task = Task(
         title = task.title,
