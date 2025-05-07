@@ -12,11 +12,14 @@ from dotenv import load_dotenv
 from fastapi.security import OAuth2PasswordBearer
 from typing import List
 import jwt
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
+from urllib.parse import urlencode
 
 router = APIRouter()
 load_dotenv()
 key = os.getenv("SECRET_KEY")
+client_id = os.getenv("GOOGLE_CLIENT_ID")
+redirect_uri = os.getenv("GOOGLE_REDIRECT_URI")
     
 @router.post("/register")
 async def register_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
@@ -66,30 +69,16 @@ def token_verification(token: str = Depends(oauth2)):
         raise HTTPException(status_code=401, detail="Token verification failed")
     return verify
     
-# @router.get("/tasks")
-# async def get_tasks(user: dict = Depends(token_verification), db: AsyncSession = Depends(get_db)):
-#     print("get tasks")
-#     query = select(Task).where(Task.user_id == user["sub"])
-#     result = await db.execute(query)
-#     tasks = result.scalars().all()
-#     return tasks
-    
-# @router.post("/tasks/")
-# async def create_task(task: Task, user: dict = Depends(token_verification), db: AsyncSession = Depends(get_db)):
-#     temp = Task(
-#         title = task.title,
-#         description = task.description,
-#         completed = task.completed,
-#         user_id = user["sub"]
-#     )
-#     db.add(temp)
-#     await db.commit()
-#     await db.refresh(temp)
-#     return temp
-# def create_task(task: Task):
-#     if not task.title.strip():
-#         raise HTTPException(status_code=400, detail="Title cannot be blank")
-#     tasks[task.id] = task
-#     return list(task.values())
-
-
+# @router.get("/google-login")
+# def google_login():
+#     google_auth_url = "https://accounts.google.com/o/oauth2/v2/auth"
+#     params = {
+#         "client_id" : client_id,
+#         "response_type": "code",
+#         "redirect_uri": redirect_uri,
+#         "scope": "openid email profile",
+#         "access_type": "offline",
+#         "prompt": "conest"
+#     }
+#     url = f"{google_auth_url}?{urlencode(params)}"
+#     return RedirectResponse(url)

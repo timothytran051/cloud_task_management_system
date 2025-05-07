@@ -15,15 +15,6 @@ def hash_password(plain_password:str ) -> str:
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
-#test hashing
-# hashed_pw = hash_password("password123")
-# print (hashed_pw)
-
-#test verify
-# stored_hash = hash_password("password123")
-# print(verify_password("password123", stored_hash))
-# print(verify_password("wrongpass", stored_hash))
-
 def generate_token(payload, key):
     expiration_time = datetime.utcnow() + timedelta(minutes=30)
     payload.update({
@@ -35,12 +26,8 @@ def generate_token(payload, key):
         # print(f"token: {token}")
         return token
     except Exception as e:
-        print(f"⚠️ JWT Encoding Error: {e}")
+        print(f"JWT Encoding Error: {e}")
         return None
-    # expiration_time = datetime.utcnow() + timedelta(minutes=30)
-    # payload.update({       
-    #     "exp": expiration_time})
-    # token = jwt.encode(payload, key, algorithm = "HS256")
 
 def verify_token(token, key):
     try:
